@@ -1,0 +1,31 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: jobportal-mysql
+    environment:
+      MYSQL_DATABASE: job_portal
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build:
+      context: .
+    container_name: jobportal-api
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/job_portal
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      JWT_SECRET: change-me-in-prod-change-me-in-prod
+      JWT_EXP_SECONDS: 86400
+    ports:
+      - "8080:8080"
+
