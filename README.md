@@ -162,6 +162,15 @@ curl -X POST http://localhost:8080/api/auth/register/candidate ^
 - Spring Cache on read-heavy job endpoints (replace with Redis in production if needed)
 
 ---
+## Screen Shot
+<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/1ef83949-d69a-445a-ba72-b33490d2602d" />
+
+---
+
+<img width="1898" height="869" alt="image" src="https://github.com/user-attachments/assets/27a22e05-9783-4446-b372-7c45ca68cf3d" />
+
+
+---
 
 ## Assignment checklist (from spec)
 
