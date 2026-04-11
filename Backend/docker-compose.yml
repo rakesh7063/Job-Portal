@@ -3,6 +3,7 @@ services:
     image: mysql:8.0
     container_name: jobportal-mysql
     environment:
+      # Creates database on first container start (empty volume).
       MYSQL_DATABASE: job_portal
       MYSQL_ROOT_PASSWORD: root
     ports:
@@ -21,7 +22,7 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://mysql:3306/job_portal
+      DB_URL: jdbc:mysql://mysql:3306/job_portal?createDatabaseIfNotExist=true
       DB_USERNAME: root
       DB_PASSWORD: root
       JWT_SECRET: change-me-in-prod-change-me-in-prod
