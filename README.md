@@ -6,7 +6,7 @@ Secure REST API where **recruiters post jobs** and **candidates apply**.
 - Java 17, Spring Boot 3.x
 - Spring Security 6 + JWT (roles: `ROLE_CANDIDATE`, `ROLE_RECRUITER`)
 - MySQL 8 + Spring Data JPA
-- Optional email via Spring Mail (SMTP)
+- email via Spring Mail (SMTP)
 - OpenAPI/Swagger UI at `/swagger-ui.html`
 
 ## Run with Docker
