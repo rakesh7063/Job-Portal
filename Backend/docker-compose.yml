@@ -26,6 +26,13 @@ services:
       DB_PASSWORD: root
       JWT_SECRET: change-me-in-prod-change-me-in-prod
       JWT_EXP_SECONDS: 86400
+      # Gmail SMTP (optional). Set MAIL_ENABLED=true and MAIL_PASSWORD (Google App Password).
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-rakeshkandar416@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-rakeshkandar416@gmail.com}
     ports:
       - "8080:8080"
 
