@@ -1,4 +1,4 @@
-package com.jobportal.security;
+package com.jobportal.config;
 
 import com.jobportal.entity.Candidate;
 import com.jobportal.entity.Recruiter;
