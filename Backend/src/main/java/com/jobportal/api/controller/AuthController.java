@@ -32,5 +32,10 @@ public class AuthController {
     public ResponseEntity<AuthDtos.AuthResponse> login(@Valid @RequestBody AuthDtos.LoginRequest req) {
         return new ResponseEntity<>( authService.login(req), HttpStatus.OK);
     }
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody AuthDtos.ForgotPasswordRequest req) {
+        authService.updatePassword(req);
+        return new ResponseEntity<>("Password Update successful..",HttpStatus.OK);
+    }
 }
 

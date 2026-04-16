@@ -1,6 +1,7 @@
 package com.jobportal.service;
 
 import com.jobportal.event.JobApplicationSubmittedEvent;
+import com.jobportal.event.ProfileUpdateSubmissionEvent;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,20 @@ public class EmailNotificationServiceImpl implements EmailNotificationService {
         }
     }
 
+    @Override
+    public void notifyProfileUpdateSubmitted(ProfileUpdateSubmissionEvent event) {
+        try{
+            System.out.println("event..." + event);
+            sendToCandidateProfileUpdate(event);
+        }
+        catch (MailAuthenticationException e){
+            logMailAuthFailure(e);
+        }
+        catch (MailException e){
+            log.warn("Failed to email candidate at {}", event.gmail(), e);
+        }
+    }
+
     private void logMailAuthFailure(MailAuthenticationException e) {
 
         log.warn(
@@ -115,9 +130,9 @@ public class EmailNotificationServiceImpl implements EmailNotificationService {
         msg.setFrom(mailFrom);
         msg.setTo(event.recruiterEmail());
         msg.setReplyTo(event.candidateEmail());
-        msg.setSubject("[Job Portal] New application: " + event.jobTitle());
+        msg.setSubject("Rojgar New application: " + event.jobTitle());
         msg.setText(String.format(
-                "Hello,%n%n%s (%s) has applied to your job \"%s\".%n%n— Job Portal",
+                "Hello,%n%n%s (%s) has applied to your job \"%s\".%n%n— Rojgar",
                 event.candidateName(),
                 event.candidateEmail(),
                 event.jobTitle()
@@ -129,13 +144,23 @@ public class EmailNotificationServiceImpl implements EmailNotificationService {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(mailFrom);
         msg.setTo(event.candidateEmail());
-        msg.setSubject("[Job Portal] Application received: " + event.jobTitle());
+        msg.setSubject("Rojgar Application received: " + event.jobTitle());
         msg.setText(String.format(
-                "Hello %s,%n%nYour application for \"%s\" was submitted successfully. The employer may reach you at %s.%n%n— Job Portal",
+                "Hello %s,%n%nYour application for \"%s\" was submitted successfully. The employer may reach you at %s.%n%n— Rojgar",
                 event.candidateName(),
                 event.jobTitle(),
                 event.candidateEmail()
         ));
         mailSender.send(msg);
     }
+    private void sendToCandidateProfileUpdate(ProfileUpdateSubmissionEvent event) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(mailFrom);
+        msg.setTo(event.gmail());
+        msg.setSubject("Rojgar Profile update" + event.name());
+        msg.setText(String.format("Hello %s, %n%n Your password successfully update.%n%n- Rojgar",
+                event.name()));
+        mailSender.send(msg);
+    }
+
 }

@@ -3,12 +3,14 @@ package com.jobportal.service;
 import com.jobportal.api.dto.AuthDtos;
 import com.jobportal.entity.Candidate;
 import com.jobportal.entity.Recruiter;
+import com.jobportal.event.ProfileUpdateSubmissionEvent;
 import com.jobportal.exception.BadRequestException;
 import com.jobportal.repository.CandidateRepository;
 import com.jobportal.repository.RecruiterRepository;
 import com.jobportal.security.AuthenticatedUser;
 import com.jobportal.security.JwtService;
 import com.jobportal.security.UserRole;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,17 +21,20 @@ public class AuthService {
     private final RecruiterRepository recruiterRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthService(
             CandidateRepository candidateRepository,
             RecruiterRepository recruiterRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.candidateRepository = candidateRepository;
         this.recruiterRepository = recruiterRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -44,6 +49,31 @@ public class AuthService {
                 .location(req.location())
                 .build();
         candidateRepository.save(c);
+    }
+    @Transactional
+    public void updatePassword(AuthDtos.ForgotPasswordRequest req){
+        String email = req.email().trim().toLowerCase();
+        Candidate c = candidateRepository.findByEmailIgnoreCase(email).orElse(null);
+        Recruiter r = recruiterRepository.findByEmailIgnoreCase(email).orElse(null);
+        System.out.println(c+" --> " +r);
+        if (c == null && r == null) {
+            throw new BadRequestException("Invalid credentials");
+        }
+        if (c != null && r != null) {
+            throw new BadRequestException("Ambiguous account; contact support");
+        }
+
+        if(c!=null){
+            c.setPassword(passwordEncoder.encode(req.password()));
+            candidateRepository.save(c);
+            eventPublisher.publishEvent( new ProfileUpdateSubmissionEvent(c.getName(),c.getEmail(),c.getSkills(),c.getLocation()));
+
+        }
+        else {
+            r.setPassword(passwordEncoder.encode(req.password()));
+            recruiterRepository.save(r);
+        }
+        eventPublisher.publishEvent( new ProfileUpdateSubmissionEvent(r.getName(),r.getEmail(),"",""));
     }
 
     @Transactional

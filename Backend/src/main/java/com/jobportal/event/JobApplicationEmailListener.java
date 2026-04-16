@@ -18,4 +18,9 @@ public class JobApplicationEmailListener {
     public void onJobApplicationSubmitted(JobApplicationSubmittedEvent event) {
         emailNotificationService.notifyJobApplicationSubmitted(event);
     }
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onCandidateProfileUpdateSubmitted(ProfileUpdateSubmissionEvent event) {
+        System.out.println("working... update profile");
+        emailNotificationService.notifyProfileUpdateSubmitted(event);
+    }
 }
