@@ -166,7 +166,8 @@ public class JobServiceImpl implements JobService {
                                 a.getCandidate().getEmail(),
                                 a.getCandidate().getExperience(),
                                 a.getCandidate().getSkills(),
-                                a.getCandidate().getLocation()
+                                a.getCandidate().getLocation(),
+                                a.getCandidate().getResumePath()
                         )
                 ))
                 .toList();

@@ -36,4 +36,6 @@ public class Candidate {
     private String skills;
 
     private String location;
+
+    private String resumePath;
 }

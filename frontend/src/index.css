@@ -1,51 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Custom Properties for Theme */
 :root {
-  --bg: #0b0d12;
-  --surface: #101523;
-  --card: #121a2d;
-  --border: rgba(255, 255, 255, 0.08);
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.7);
-  --muted2: rgba(255, 255, 255, 0.55);
-  --primary: #7c5cff;
-  --primary2: #22c55e;
-  --danger: #ef4444;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --ring: 0 0 0 4px rgba(124, 92, 255, 0.25);
-
-  --radius: 14px;
-  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial,
-    'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
-  --mono: ui-monospace, Consolas, 'SFMono-Regular', Menlo, monospace;
-
-  color-scheme: dark;
-  font: 16px/1.45 var(--sans);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html[data-theme='light'] {
-  --bg: #f7f8fb;
-  --surface: #ffffff;
+  --border: #e5e7eb;
   --card: #ffffff;
-  --border: rgba(15, 23, 42, 0.12);
-  --text: rgba(15, 23, 42, 0.92);
-  --muted: rgba(15, 23, 42, 0.72);
-  --muted2: rgba(15, 23, 42, 0.56);
-  --shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-  color-scheme: light;
+  --surface: #f9fafb;
+  --muted: #6b7280;
+  --text: #111827;
+  --primary: #2563eb;
+  --primary2: #059669;
+  --danger: #dc2626;
+  --radius: 12px;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --ring: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 'Cascadia Code', monospace;
 }
 
-html[data-theme='dark'] {
-  color-scheme: dark;
+/* Dark mode CSS variables */
+.dark {
+  --border: #374151;
+  --card: #1f2937;
+  --surface: #111827;
+  --muted: #9ca3af;
+  --text: #f9fafc;
+  --primary: #3b82f6;
+  --primary2: #10b981;
+  --danger: #ef4444;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --ring: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
-body {
-  margin: 0;
-  background: radial-gradient(1200px 800px at 20% -10%, rgba(124, 92, 255, 0.25), transparent 60%),
-    radial-gradient(1000px 700px at 90% 10%, rgba(34, 197, 94, 0.14), transparent 55%),
-    var(--bg);
-  color: var(--text);
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+  }
+
+  h1 {
+    @apply text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  h4 {
+    @apply text-xl font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  h5 {
+    @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+  }
+
+  h6 {
+    @apply text-base font-semibold text-gray-900 dark:text-gray-100;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 transition-colors;
+  }
+
+  .text-muted {
+    @apply text-gray-600;
+  }
+
+  .text-subtle {
+    @apply text-gray-500 text-sm;
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-gray-900 text-gray-100;
+  }
 }
 
 a {

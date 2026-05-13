@@ -10,6 +10,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage.jsx'
 import { CandidateProfilePage } from './pages/candidate/CandidateProfilePage.jsx'
 import { RecruiterMyJobsPage } from './pages/recruiter/RecruiterMyJobsPage.jsx'
 import { RecruiterPostJobPage } from './pages/recruiter/RecruiterPostJobPage.jsx'
+import { RecruiterAiAnalysisPage } from './pages/recruiter/RecruiterAiAnalysisPage.jsx'
 import { RecruiterApplicantsPage } from './pages/recruiter/RecruiterApplicantsPage.jsx'
 import { RequireAuth } from './shared/auth/RequireAuth.jsx'
 
@@ -28,6 +29,15 @@ function App() {
           path="/candidate/profile"
           element={
             <RequireAuth allow={['ROLE_CANDIDATE']}>
+              <CandidateProfilePage />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/recruiter/candidates/:candidateId"
+          element={
+            <RequireAuth allow={['ROLE_RECRUITER']}>
               <CandidateProfilePage />
             </RequireAuth>
           }
@@ -54,6 +64,14 @@ function App() {
           element={
             <RequireAuth allow={['ROLE_RECRUITER']}>
               <RecruiterApplicantsPage />
+            </RequireAuth>
+          }
+        />
+         <Route
+          path="/recruiter/jobs/:jobId/applicants-analyze"
+          element={
+            <RequireAuth allow={['ROLE_RECRUITER']}>
+              <RecruiterAiAnalysisPage />
             </RequireAuth>
           }
         />

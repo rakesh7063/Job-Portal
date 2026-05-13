@@ -51,7 +51,8 @@ public final class JobDtos {
             String email,
             int experience,
             String skills,
-            String location
+            String location,
+            String resumePath
     ) {
     }
 

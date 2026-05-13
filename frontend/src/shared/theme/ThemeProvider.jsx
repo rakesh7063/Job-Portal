@@ -22,7 +22,12 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const apply = () => {
       const t = resolveTheme(mode)
-      document.documentElement.setAttribute('data-theme', t)
+      const root = document.documentElement
+      if (t === 'dark') {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
     }
     apply()
 

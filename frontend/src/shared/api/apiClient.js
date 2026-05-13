@@ -16,21 +16,33 @@ async function parseBody(res) {
   return text
 }
 
-export async function apiRequest(path, { method = 'GET', body, token, headers } = {}) {
+export async function apiRequest(path, { method = 'GET', body, token, headers, responseType } = {}) {
   const auth = getStoredAuth()
   const effectiveToken = token ?? auth.token
+
+  // Don't set Content-Type for FormData - let the browser set it with boundary
+  const isFormData = body instanceof FormData
 
   const res = await fetch(path.startsWith('http') ? path : path, {
     method,
     headers: {
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
+      ...(body && !isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
       ...(headers || {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   })
 
   if (res.status === 204) return null
+
+  if (responseType === 'blob') {
+    if (!res.ok) {
+      const text = await res.text()
+      const msg = text || `Request failed (${res.status})`
+      throw new ApiError(msg, { status: res.status, data: text })
+    }
+    return await res.blob()
+  }
 
   let data
   try {

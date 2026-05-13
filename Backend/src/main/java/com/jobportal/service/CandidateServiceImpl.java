@@ -9,6 +9,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 @Service
 public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
@@ -40,6 +46,37 @@ public class CandidateServiceImpl implements CandidateService {
         return toProfile(c);
     }
 
+    @Transactional
+    @Override
+    public void uploadResume(Long candidateId, byte[] resumeData, String fileName) {
+        Candidate c = candidateRepository.findById(candidateId)
+                .orElseThrow(() -> new NotFoundException("Candidate not found"));
+
+        try {
+            // Create uploads/resumes directory if it doesn't exist
+            Path uploadDir = Paths.get("uploads", "resumes");
+            Files.createDirectories(uploadDir);
+
+            // Generate unique filename
+            String extension = getFileExtension(fileName);
+            String uniqueFileName = candidateId + "_" + System.currentTimeMillis() + "." + extension;
+            Path filePath = uploadDir.resolve(uniqueFileName);
+
+            // Save file
+            Files.write(filePath, resumeData);
+
+            // Update candidate with resume path
+            c.setResumePath(filePath.toString());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save resume file", e);
+        }
+    }
+
+    private String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        return lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1) : "pdf";
+    }
+
     private static CandidateDtos.CandidateProfileResponse toProfile(Candidate c) {
         return new CandidateDtos.CandidateProfileResponse(
                 c.getId(),
@@ -47,7 +84,8 @@ public class CandidateServiceImpl implements CandidateService {
                 c.getEmail(),
                 c.getExperience(),
                 c.getSkills(),
-                c.getLocation()
+                c.getLocation(),
+                c.getResumePath()
         );
     }
 }

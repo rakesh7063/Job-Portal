@@ -24,8 +24,8 @@ This repository contains:
   - Dockerized backend + DB
 
 ## Tech stack
-- **Frontend**: React + Vite
-- **Backend**: Java 17+, Spring Boot 3.x, Spring Security 6 + JWT, Spring Data JPA
+- **Frontend**: React + Vite, Tailwind CSS
+- **Backend**: Java 17+, Spring Boot 3.x, Spring Security 6 + JWT, Spring Data JPA, Spring AI, Gemini AI
 - **Database**: MySQL 8 (H2 in-memory for tests)
 - **API Docs**: Swagger UI (`/swagger-ui.html` and `/swagger-ui/index.html`)
 
@@ -159,6 +159,460 @@ From the `Backend` directory:
 
 The **`test`** profile uses **H2 in-memory** (`src/test/resources/application-test.properties`), so you do **not** need Docker or MySQL. Seeded users (`DataLoader`) are **disabled** in tests.
 
+---
+# Visual Guide - New Features
+
+## 🎬 Feature Flows
+
+### Feature 1: Resume Upload Flow
+```
+┌─────────────────┐
+│  Candidate      │
+│  Logs in        │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────┐
+│  Profile Page                   │
+│  (CandidateProfilePage.jsx)    │
+└────────┬────────────────────────┘
+         │
+         ▼ New Resume Section
+    ┌─────────────────┐
+    │ 📄 Resume       │
+    │ No upload ⬜   │
+    │ [Upload Button] │
+    └────────┬────────┘
+             │
+             ▼ Select PDF
+        ┌─────────────┐
+        │ Uploading.. │
+        │ ▓▓▓▓▓░░░░░ │
+        └────────┬────┘
+                 │
+                 ▼
+        ┌──────────────┐
+        │ ✓ Uploaded   │ ← Success!
+        │ ✓ Resume     │
+        └──────────────┘
+         
+Backend Flow:
+CandidateProfilePage.jsx
+    ↓ uploadResume(file)
+CandidateController
+    ↓ /api/candidates/profile/resume
+CandidateServiceImpl.uploadResume()
+    ↓ Save to uploads/resumes/
+Database
+    ↓ Update resumePath
+```
+
+---
+
+### Feature 2: Recruiter View Applicants + Resume Download
+```
+┌──────────────────┐
+│ Recruiter        │
+│ Logs in          │
+└────────┬─────────┘
+         │
+         ▼
+    ┌─────────────────┐
+    │ My Jobs         │
+    │ (My Jobs Page)  │
+    └────────┬────────┘
+             │
+             ▼
+    ┌────────────────────────┐
+    │ Applicants [Button]    │
+    │ 🤖 AI Analysis [NEW]   │
+    └────────┬───────────────┘
+             │
+             ▼
+    ┌──────────────────────────────┐
+    │ Applicants Page              │
+    │ (RecruiterApplicantsPage.jsx)│
+    │                              │
+    │ Alice Johnson                │
+    │ alice@example.com            │
+    │ 7 yrs • Java, Spring         │
+    │ [📄 Resume] [View Details]   │◄─ NEW Download
+    │                              │
+    │ Bob Smith                    │
+    │ bob@example.com              │
+    │ 3 yrs • JavaScript           │
+    │ [No resume] [View Details]   │
+    └──────────────────────────────┘
+             │
+             ▼ Click [📄 Resume]
+    ┌──────────────────┐
+    │ Download Started │
+    │ candidate_resume │
+    │ .pdf             │
+    └──────────────────┘
+```
+
+---
+
+### Feature 3: Gemini AI Analysis (Most Powerful!)
+```
+┌──────────────────────────┐
+│ Recruiter on My Jobs     │
+│ Sees 🤖 AI Analysis [NEW]│ ◄─ Blue Button
+└──────────┬───────────────┘
+           │
+           ▼
+┌────────────────────────────────────┐
+│ AI Analysis Page [NEW]              │
+│ (RecruiterAiAnalysisPage.jsx)      │
+│                                    │
+│ Job: Senior Java Developer         │
+│ Applicants: 12                     │
+│                                    │
+│ [🚀 Run AI Analysis]               │◄─ Click Here
+│                                    │
+│ All Applicants:                    │
+│ • Alice Johnson                    │
+│ • Bob Smith                        │
+│ • Charlie Brown                    │
+│ ... (12 total)                     │
+└──────────┬─────────────────────────┘
+           │
+           ▼ Click Button
+           │
+      [Processing...]
+      Analyzing with Gemini AI
+      [████████░░]
+           │
+           ▼ (5-10 seconds)
+           │
+┌──────────────────────────────────────────┐
+│ TOP 5 CANDIDATES RANKED                  │
+│ (Powered by Gemini AI)                   │
+├──────────────────────────────────────────┤
+│                                          │
+│ 🥇 #1 Alice Johnson         92% ████████│
+│   ✅ Highly Recommended                  │
+│   Java • Spring Boot • Docker            │
+│   [View Details] [Download Resume]       │
+│                                          │
+│ 🥈 #2 Charlie Brown         78% ██████░ │
+│   ✅ Recommended                         │
+│   Java • Spring Boot                     │
+│   [View Details] [Download Resume]       │
+│                                          │
+│ 🥉 #3 Diana White           65% █████░░ │
+│   ⚠️ Consider                            │
+│   Java (Junior Level)                    │
+│   [View Details] [Download Resume]       │
+│                                          │
+│ #4 Eve Martinez             58% ████░░░ │
+│   ⚠️ Consider                            │
+│   Frontend Background                    │
+│   [View Details] [Download Resume]       │
+│                                          │
+│ #5 Frank Jones              42% ███░░░░ │
+│   ❌ Not Recommended                     │
+│   No Relevant Background                 │
+│   [View Details] [Download Resume]       │
+│                                          │
+└──────────────────────────────────────────┘
+           │
+           ▼ Click "View Details"
+           │
+┌──────────────────────────────────────────┐
+│ Detailed Analysis for Alice Johnson      │
+│                                          │
+│ Match Score: 92/100                      │
+│ Recommendation: Highly Recommended       │
+│                                          │
+│ ✓ STRENGTHS:                             │
+│   • 7 years relevant Java experience     │
+│   • Expert-level Spring Boot knowledge   │
+│   • Strong Docker/containerization       │
+│   • Aligned with team location           │
+│                                          │
+│ MATCHING SKILLS:                         │
+│   Java • Spring Boot • Microservices     │
+│                                          │
+│ Analysis Summary:                        │
+│ "Excellent match for Senior Java role.  │
+│  Strong architecture background,         │
+│  proven track record with modern         │
+│  technologies, located in target area."  │
+│                                          │
+│ [Download Resume] [Back]                 │
+└──────────────────────────────────────────┘
+
+Backend Flow:
+RecruiterAiAnalysisPage.jsx
+    ↓ analyzeJobApplicants(jobId)
+AiAnalysisController
+    ↓ POST /api/ai/jobs/{jobId}/analyze
+For each applicant:
+    ↓ analyzeSingleCandidate(job, app)
+GeminiAiService.analyzeCandidateMatch()
+    ↓ Send to Google Gemini API
+Gemini API
+    ↓ AI analyzes candidate
+Parse Response
+    ↓ Extract match score, recommendation
+Sort by matchScore DESC, take top 5
+    ↓ Return JobAiAnalysisResponse
+```
+
+---
+
+## 🎨 UI Layout
+
+### Candidate Profile - Resume Section
+```
+┌─────────────────────────────────────┐
+│ Your Profile                        │
+├─────────────────────────────────────┤
+│                                     │
+│ [Profile Form Fields...]            │
+│                                     │
+│ ─────────────────────────────────── │
+│                                     │
+│ Resume                              │
+│ ┌──────────────────────┐            │
+│ │ ✓ Resume uploaded    │◄─ NEW      │
+│ └──────────────────────┘            │
+│                                     │
+│ [Upload Resume (PDF)]    ◄─ NEW     │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+### Recruiter - Applicants Page
+```
+┌─────────────────────────────────────┐
+│ ← Back | Job Details | 🤖 AI Analysis│◄─ NEW Button
+├─────────────────────────────────────┤
+│ Applicants                          │
+│ "Review all candidates..."          │
+├─────────────────────────────────────┤
+│                                     │
+│ ┌─────────────────────────────────┐ │
+│ │ Alice Johnson                   │ │
+│ │ alice@example.com               │ │
+│ │ 7y exp • Java, Spring • NYC     │ │
+│ │ Applied: 2 hours ago            │ │
+│ │                         📄 Resume│◄─ NEW Download
+│ └─────────────────────────────────┘ │
+│                                     │
+│ ┌─────────────────────────────────┐ │
+│ │ Bob Smith                       │ │
+│ │ bob@example.com                 │ │
+│ │ 3y exp • JavaScript • Austin    │ │
+│ │ Applied: 5 hours ago            │ │
+│ │                    No resume ⚠️  │◄─ NEW Status
+│ └─────────────────────────────────┘ │
+│                                     │
+│ [Load More...]                      │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+### Recruiter - AI Analysis Page
+```
+┌──────────────────────────────────────┐
+│ 🤖 AI Candidate Analysis             │
+│ "Top 5 ranked by match score"        │◄─ NEW Page
+├──────────────────────────────────────┤
+│                                      │
+│ Applicants (12)  [🚀 Run AI Analysis]│◄─ NEW Button
+│                                      │
+│ ┌──────────────────────────────────┐ │
+│ │ #1 Alice 92% ████████ ✅         │ │
+│ │ ▶ View Details                   │ │
+│ └──────────────────────────────────┘ │
+│ ┌──────────────────────────────────┐ │
+│ │ #2 Charlie 78% ██████░ ✅        │ │
+│ │ ▶ View Details                   │ │
+│ └──────────────────────────────────┘ │
+│ ┌──────────────────────────────────┐ │
+│ │ #3 Diana 65% █████░░ ⚠️          │ │
+│ │ ▶ View Details                   │ │
+│ └──────────────────────────────────┘ │
+│ ┌──────────────────────────────────┐ │
+│ │ #4 Eve 58% ████░░░░ ⚠️           │ │
+│ │ ▶ View Details                   │ │
+│ └──────────────────────────────────┘ │
+│ ┌──────────────────────────────────┐ │
+│ │ #5 Frank 42% ███░░░░░ ❌         │ │
+│ │ ▶ View Details                   │ │
+│ └──────────────────────────────────┘ │
+│                                      │
+│ All Applicants                       │
+│ • Alice Johnson                      │
+│ • Bob Smith                          │
+│ • Charlie Brown                      │
+│ ...                                  │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+---
+
+## 📊 Data Flow Diagram
+
+```
+CANDIDATE SIDE
+    │
+    ├─► Upload Resume
+    │   ├─► Select PDF
+    │   ├─► Validate (PDF only)
+    │   ├─► Upload to /api/candidates/profile/resume
+    │   ├─► Save to uploads/resumes/candidate-{id}-{ts}.pdf
+    │   └─► Update Candidate.resumePath
+    │
+    └─► Profile Shows ✓ Resume uploaded
+
+
+RECRUITER SIDE - TRADITIONAL
+    │
+    ├─► View My Jobs
+    │   │
+    │   └─► Click "Applicants"
+    │       ├─► Fetch /api/applications/{jobId}
+    │       ├─► Display Candidate list
+    │       ├─► Show resume status
+    │       │
+    │       └─► [📄 Resume] Button
+    │           ├─► GET /api/applications/resume/{appId}
+    │           ├─► Check authorization (recruiter == job poster)
+    │           ├─► Check resume exists
+    │           └─► Download PDF
+
+
+RECRUITER SIDE - AI ANALYSIS (NEW!)
+    │
+    ├─► View My Jobs
+    │   │
+    │   └─► Click "🤖 AI Analysis" (NEW)
+    │       │
+    │       ├─► Go to RecruiterAiAnalysisPage
+    │       │
+    │       ├─► Fetch /api/ai/jobs/{jobId}/applicants
+    │       │   └─► Display all applicants
+    │       │
+    │       └─► [🚀 Run AI Analysis]
+    │           │
+    │           ├─► POST /api/ai/jobs/{jobId}/analyze
+    │           │
+    │           ├─► For each applicant:
+    │           │   │
+    │           │   ├─► Fetch from DB (name, skills, exp, location)
+    │           │   ├─► Extract resume path
+    │           │   │
+    │           │   └─► Call GeminiAiService.analyzeCandidateMatch()
+    │           │       ├─► Build prompt with job desc + candidate info
+    │           │       ├─► POST to Gemini API
+    │           │       ├─► Parse response (JSON)
+    │           │       ├─► Extract matchScore, recommendation
+    │           │       └─► Return CandidateAnalysisResult
+    │           │
+    │           ├─► Sort by matchScore DESC
+    │           ├─► Take top 5
+    │           └─► Return JobAiAnalysisResponse
+    │               │
+    │               └─► Display as ranked list
+    │                   │
+    │                   └─► [View Details]
+    │                       └─► Show full analysis
+    │                           ├─► Match score with color
+    │                           ├─► Recommendation level
+    │                           ├─► Matching skills
+    │                           ├─► Strengths
+    │                           └─► Concerns
+```
+
+---
+
+## 🔄 State Management
+
+### Frontend State (React)
+```
+RecruiterAiAnalysisPage State:
+├─ jobId (from URL param)
+├─ loading (fetching applicants)
+├─ analyzing (running AI analysis)
+├─ applicants (array of applicants)
+├─ analysis (JobAiAnalysisResponse)
+├─ err (error message)
+└─ expandedCandidateId (for details view)
+
+CandidateProfilePage State:
+├─ profile (current profile data)
+├─ form (form fields)
+├─ loading (fetching profile)
+├─ saving (updating profile)
+├─ resumeUploading (uploading resume)
+├─ err (error message)
+└─ ok (success message)
+```
+
+---
+
+## 🎯 Color Coding System
+
+```
+Match Score Range → Color → Meaning
+─────────────────────────────────────
+80-100           → 🟢 Green   → Highly Recommended
+60-79            → 🟠 Orange  → Recommended
+40-59            → 🟡 Yellow  → Consider
+0-39             → 🔴 Red     → Not Recommended
+
+Visual Implementation:
+┌──────────────────────┐
+│ Alice 92/100 ████████│ ← Green bar
+│ ✅ Highly Recommended│
+└──────────────────────┘
+
+┌──────────────────────┐
+│ Bob 65/100 █████░░░░ │ ← Orange bar
+│ ✅ Recommended       │
+└──────────────────────┘
+
+┌──────────────────────┐
+│ Charlie 42/100 ███░░ │ ← Red bar
+│ ⚠️ Consider          │
+└──────────────────────┘
+```
+
+---
+
+## 🔐 Authorization Checks
+
+```
+Resume Upload:
+✓ User must be authenticated (ROLE_CANDIDATE)
+✓ Can only upload for own profile
+✓ File must be PDF
+
+Resume Download:
+✓ User must be authenticated (ROLE_RECRUITER)
+✓ Recruiter must have posted the job
+✓ Application must exist
+✓ Resume must exist at path
+
+AI Analysis - Full Job:
+✓ User must be authenticated (ROLE_RECRUITER)
+✓ Recruiter must have posted the job
+
+AI Analysis - Single Candidate:
+✓ User must be authenticated (ROLE_RECRUITER)
+✓ Recruiter must have posted the job
+✓ Application must exist
+✓ Candidate must have applied to job
+```
+
+---
+
+**Visual Guide Complete!** 📊
 ---
 
 ## Screenshots
